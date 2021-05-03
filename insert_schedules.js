@@ -41,60 +41,63 @@ const pullAndInsertSchedules = async () => {
     try {
         const response = await axios.get(esoUrl, {params, headers: {Accept: 'application/json'}})
                 
-                    var data = await response.data.Schedules
+        var data = await response.data.Schedules
+    
+        console.log(data)
                 
-                    console.log(data)
-                            
-                    await sql.connect(config)
-            
-                    console.log("connected")
-                    
-                    const table = new sql.Table("SchedulesTableFour");
-                    table.create = true;
-                    
-                    table.columns.add('EmployeeId', sql.VarChar(15), { nullable: true });
-                    table.columns.add('CostCenter', sql.VarChar(40), { nullable: true });
-                    table.columns.add('StartTime', sql.VarChar(30), { nullable: true });
-                    table.columns.add('EndTime', sql.VarChar(30), { nullable: true });
-                    table.columns.add('Duration', sql.Decimal(4,2), { nullable: true });
-                    table.columns.add('EarningCode', sql.VarChar(30), { nullable: true });
-                    table.columns.add('itemID', sql.Int, { nullable: true });
-                    table.columns.add('Qualification', sql.VarChar(50), { nullable: true });
-                    table.columns.add('ShiftId', sql.Int, { nullable: true });
-                    table.columns.add('UnitName', sql.VarChar(50), { nullable: true });
-                    table.columns.add('Comments', sql.VarChar(sql.MAX), { nullable: true });
-                    table.columns.add('inServiceTime', sql.DateTime, { nullable: true });
-                    table.columns.add('OutServiceTime', sql.DateTime, { nullable: true });
-                    table.columns.add('ResourceType', sql.VarChar(50), { nullable: true });
-                    table.columns.add('VehicleName', sql.VarChar(50), { nullable: true });
+        await sql.connect(config)
 
-                    var count = Object.keys(data).length;
-                    console.log(count);
-                    
-                    for (i = 0; i < count; i++) {
-                    table.rows.add(data[i].EmployeeId, data[i].CostCenter, data[i].StartTime, 
-                        data[i].EndTime, data[i].Duration, data[i].EarningCode, data[i].ItemId, 
-                        data[i].Qualification, data[i].ShiftId, data[i].UnitName, data[i].Comments, 
-                        data[i].InServiceTime, data[i].OutServiceTime, data[i].ResourceType, data[i].VehicleName);
-                    }
-                    
-                    const req = new sql.Request();
-                    req.bulk(table, (error, result) => {
-                        if (error) {
-                            console.log(error)
-                        }
-                        else {
-                            console.log("success" + result)
-                        }
-                    })
-                            
-                }
-                catch (error) {
-                    console.log(error)
-                }
+        console.log("connected")
+        
+        const table = new sql.Table("SchedulesTableclose");
+        table.create = true;
+        
+        table.columns.add('EmployeeId', sql.VarChar(15), { nullable: true });
+        table.columns.add('CostCenter', sql.VarChar(40), { nullable: true });
+        table.columns.add('StartTime', sql.VarChar(30), { nullable: true });
+        table.columns.add('EndTime', sql.VarChar(30), { nullable: true });
+        table.columns.add('Duration', sql.Decimal(4,2), { nullable: true });
+        table.columns.add('EarningCode', sql.VarChar(30), { nullable: true });
+        table.columns.add('itemID', sql.Int, { nullable: true });
+        table.columns.add('Qualification', sql.VarChar(50), { nullable: true });
+        table.columns.add('ShiftId', sql.Int, { nullable: true });
+        table.columns.add('UnitName', sql.VarChar(50), { nullable: true });
+        table.columns.add('Comments', sql.VarChar(sql.MAX), { nullable: true });
+        table.columns.add('inServiceTime', sql.DateTime, { nullable: true });
+        table.columns.add('OutServiceTime', sql.DateTime, { nullable: true });
+        table.columns.add('ResourceType', sql.VarChar(50), { nullable: true });
+        table.columns.add('VehicleName', sql.VarChar(50), { nullable: true });
 
-            
+        var count = Object.keys(data).length;
+        console.log(count);
+        
+        for (i = 0; i < count; i++) {
+        table.rows.add(data[i].EmployeeId, data[i].CostCenter, data[i].StartTime, 
+            data[i].EndTime, data[i].Duration, data[i].EarningCode, data[i].ItemId, 
+            data[i].Qualification, data[i].ShiftId, data[i].UnitName, data[i].Comments, 
+            data[i].InServiceTime, data[i].OutServiceTime, data[i].ResourceType, data[i].VehicleName);
+        }
+        
+        const req = new sql.Request();
+        req.bulk(table, (error, result) => {
+            if (error) {
+                console.log(error)
+                sql.close()
+            }
+            else {
+                console.log("success" + result)
+                sql.close()
+            }
+        })
+                
     }
+
+    catch (error) {
+        console.log(error)
+    }
+
+            
+}
     
 pullAndInsertSchedules()
     

@@ -1,4 +1,3 @@
-
 const axios = require('axios')
 const url = require('url')
 const sql = require('mssql'); 
@@ -94,4 +93,3 @@ const pullAndInsertPunches = async () => {
     }
     
     pullAndInsertPunches()
-    

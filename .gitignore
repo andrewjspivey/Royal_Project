@@ -1,2 +1,4 @@
 .env
 node_modules
+.docker_env
+.eslintrc.js
