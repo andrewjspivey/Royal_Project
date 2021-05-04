@@ -3,10 +3,10 @@
 const main = () => {
     console.log("i'm in main 2!");
     // Initial setup.
-    // Start payrolldetails.
+    // Start schedules/punches
 
     // insert_punchces()
-    // myCrons = [PunchesCron(), ScheduleCron(), ...];
+    // myCrons = [PunchesCron(), ScheduleCron() ...];
     // for (cron in myCrons){
     //     cron.Run();
     // }

@@ -33,7 +33,7 @@ const pullAndInsertEmployees = async () => {
         const table = new sql.Table("EmployeesTest");
         table.create = true;
         
-        table.columns.add('EmployeeId', sql.VarChar(20), { nullable: true });
+        table.columns.add('EmployeeId', sql.VarChar(20), { nullable: false, primary: true });
         table.columns.add('FirstName', sql.VarChar(30), { nullable: true });
         table.columns.add('LastName', sql.VarChar(40), { nullable: true });
         table.columns.add('Address', sql.VarChar(60), { nullable: true });

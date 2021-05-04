@@ -3,7 +3,7 @@ const axios = require('axios')
 const url = require('url')
 const sql = require('mssql'); 
 
-const subDays = require('date-fns/subDays')
+const addDays = require('date-fns/addDays')
 var format = require('date-fns/format')
 
 const dotenv = require('dotenv')
@@ -15,17 +15,17 @@ const vendorKey = process.env.ESO_VENDOR_KEY
 
 
 
-let startSubDaysAgo = subDays(new Date(), 4)
-let threeDaysAgo = format(new Date(startSubDaysAgo), 'MM/dd/yyyy')
+let dayInFuture = addDays(new Date(), 1)
+let tomorrow = format(new Date(dayInFuture), 'MM/dd/yyyy')
 
-let endSubDaysAgo = subDays(new Date(), 3)
-let twoDaysAgo = format(new Date(endSubDaysAgo), 'MM/dd/yyyy')
+let dayAfter = addDays(new Date(), 2)
+let nextDay = format(new Date(dayAfter), 'MM/dd/yyyy')
 
-console.log(threeDaysAgo)
+console.log(dayInFuture)
 
 
 const esoUrl = `https://sched-api.esosuite.net/API_v1.7/EmployeeService.svc/GetSchedules?custId=${custId}&pass=${esoPassword}&vendorKey=${vendorKey}`
-const params = new url.URLSearchParams({ starttime: threeDaysAgo, endtime: twoDaysAgo});
+const params = new url.URLSearchParams({ starttime: tomorrow, endtime: nextDay});
 
 
 const config = {
@@ -49,13 +49,13 @@ const pullAndInsertSchedules = async () => {
 
         console.log("connected")
         
-        const table = new sql.Table("SchedulesTableclose");
+        const table = new sql.Table("SchedulesTomorrow");
         table.create = true;
         
-        table.columns.add('EmployeeId', sql.VarChar(15), { nullable: true });
+        table.columns.add('EmployeeId', sql.VarChar(15), { nullable: true});
         table.columns.add('CostCenter', sql.VarChar(40), { nullable: true });
-        table.columns.add('StartTime', sql.VarChar(30), { nullable: true });
-        table.columns.add('EndTime', sql.VarChar(30), { nullable: true });
+        table.columns.add('StartTime', sql.DateTime, { nullable: true });
+        table.columns.add('EndTime', sql.DateTime, { nullable: true });
         table.columns.add('Duration', sql.Decimal(4,2), { nullable: true });
         table.columns.add('EarningCode', sql.VarChar(30), { nullable: true });
         table.columns.add('itemID', sql.Int, { nullable: true });

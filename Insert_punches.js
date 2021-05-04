@@ -13,16 +13,16 @@ const custId = process.env.ESO_CUST_ID
 const esoPassword = process.env.ESO_PASSWORD
 const vendorKey = process.env.ESO_VENDOR_KEY
 
-let startSubDaysAgo = subDays(new Date(), 4)
-let twoDaysAgo = format(new Date(startSubDaysAgo), 'MM/dd/yyyy')
+let startSubDaysAgo = subDays(new Date(), 1)
+let yesterday = format(new Date(startSubDaysAgo), 'MM/dd/yyyy')
 
-let endSubDaysAgo = subDays(new Date(), 3)
-let oneDayAgo = format(new Date(endSubDaysAgo), 'MM/dd/yyyy')
+let endSubDaysAgo = subDays(new Date(), 0)
+let today = format(new Date(endSubDaysAgo), 'MM/dd/yyyy')
 
-console.log(twoDaysAgo)
+console.log(yesterday)
 
 const esoUrl = `https://sched-api.esosuite.net/API_v1.7/EmployeeService.svc/GetPunches?custId=${custId}&pass=${esoPassword}&vendorKey=${vendorKey}`
-const params = new url.URLSearchParams({ starttime: twoDaysAgo, endtime: oneDayAgo});
+const params = new url.URLSearchParams({ starttime: yesterday, endtime: today});
 
 
 const config = {
@@ -47,15 +47,15 @@ const pullAndInsertPunches = async () => {
 
         console.log("connected")
         
-        const table = new sql.Table("PunchesTableDockerTest");
+        const table = new sql.Table("PunchesPunchId");
         table.create = true;
         
-        table.columns.add('EmployeeId', sql.VarChar(20), { nullable: true });
+        table.columns.add('EmployeeId', sql.VarChar(20), { nullable: false });
         table.columns.add('FirstName', sql.VarChar(30), { nullable: true });
         table.columns.add('LastName', sql.VarChar(40), { nullable: true });
-        table.columns.add('InPunchTime', sql.VarChar(30), { nullable: true });
-        table.columns.add('OutPunchTime', sql.VarChar(30), { nullable: true });
-        table.columns.add('PunchId', sql.Int, { nullable: true });
+        table.columns.add('InPunchTime', sql.DateTime, { nullable: true });
+        table.columns.add('OutPunchTime', sql.DateTime, { nullable: true });
+        table.columns.add('PunchId', sql.Int, { nullable: false, primary: true });
         table.columns.add('StartComment', sql.VarChar(sql.MAX), { nullable: true });
         table.columns.add('EndComment', sql.VarChar(sql.MAX), { nullable: true });
         table.columns.add('EHomeCostCenter', sql.VarChar(50), { nullable: true });
