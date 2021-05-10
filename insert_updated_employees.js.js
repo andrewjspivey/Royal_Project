@@ -2,7 +2,6 @@ const axios = require('axios')
 const url = require('url')
 const sql = require('mssql'); 
 
-
 const dotenv = require('dotenv')
 dotenv.config()
 
@@ -21,21 +20,37 @@ const config = {
 };
 
 
+const clearTable = async () => {
+    await sql.connect(config)
+    try {
+        let result1 = new sql.Request()
+        sqlQuery = `drop table if exists EmployeesTest2`
+        result1.query(sqlQuery, function (err, data) {
+            if (err) console.log(err)
+            sql.close()
+        })
+            
+        } catch (err) {
+            console.log(err)
+            sql.close()
+        }
+}
+
 const pullAndInsertEmployees = async () => {
 
     try {
         const response = await axios.get(esoUrl, {headers: {Accept: 'application/json'}})
                 
         var data = await response.data.Employees
-                
+
         await sql.connect(config)
         
         const table = new sql.Table("EmployeesTest2");
         table.create = true;
         
         table.columns.add('EmployeeId', sql.VarChar(20), { nullable: false, primary: true });
-        table.columns.add('FirstName', sql.VarChar(30), { nullable: true });
-        table.columns.add('LastName', sql.VarChar(40), { nullable: true });
+        table.columns.add('FirstName', sql.VarChar(25), { nullable: false });
+        table.columns.add('LastName', sql.VarChar(40), { nullable: false });
         table.columns.add('Address', sql.VarChar(60), { nullable: true });
         table.columns.add('BirthDate', sql.VarChar(40), { nullable: true });
         table.columns.add('CellPhone', sql.VarChar(20), { nullable: true });
@@ -49,9 +64,7 @@ const pullAndInsertEmployees = async () => {
         table.columns.add('PayrollId', sql.VarChar(6), { nullable: true });
         table.columns.add('Status', sql.Int, { nullable: true });
         
-        
-        
-
+    
         var count = Object.keys(data).length;
         console.log(count);
         
@@ -62,23 +75,37 @@ const pullAndInsertEmployees = async () => {
             data[i].HomeCostCenter, data[i].PayRate, data[i].PayrollId, data[i].Status);
         }
         
-        const req = new sql.Request();
+        const req = new sql.Request()
         req.bulk(table, (error, result) => {
             if (error) {
-                console.log(error)
-                sql.close()
+                console.log(error);
+                sql.close();
             }
             else {
-                console.log("success" + result)
-                sql.close()
+                console.log("success" + result);
+                
+                sql.close();
             }
         })
 
-    }
+        }
+        catch (error) {
+            console.log(error)
+        }
+}
 
-    catch (error) {
-        console.log(error)
+
+const clearAndBulkInsert = async () => {
+    try {
+        await clearTable()
+
+        setTimeout(() => {
+            pullAndInsertEmployees() 
+        }, 3000);
+        
+    } catch (err) {
+        console.log(err)
     }
 }
-    
-pullAndInsertEmployees()
+
+clearAndBulkInsert()

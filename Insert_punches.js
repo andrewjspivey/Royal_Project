@@ -13,10 +13,10 @@ const custId = process.env.ESO_CUST_ID
 const esoPassword = process.env.ESO_PASSWORD
 const vendorKey = process.env.ESO_VENDOR_KEY
 
-let startSubDaysAgo = subDays(new Date(), 1)
+let startSubDaysAgo = subDays(new Date(), 4)
 let yesterday = format(new Date(startSubDaysAgo), 'MM/dd/yyyy')
 
-let endSubDaysAgo = subDays(new Date(), 0)
+let endSubDaysAgo = subDays(new Date(), 3)
 let today = format(new Date(endSubDaysAgo), 'MM/dd/yyyy')
 
 console.log(yesterday)
@@ -40,12 +40,8 @@ const pullAndInsertPunches = async () => {
         const response = await axios.get(esoUrl, {params, headers: {Accept: 'application/json'}})
                 
         var data = await response.data.Punches
-    
-        //console.log(data[15])
-                
-        await sql.connect(config)
 
-        console.log("connected")
+        await sql.connect(config)
         
         const table = new sql.Table("PunchesPunchId");
         table.create = true;
@@ -82,16 +78,11 @@ const pullAndInsertPunches = async () => {
                 sql.close()
             }
         })
-
-        
-                        
-        }
-        catch (error) {
-            console.log(error)
-        }
-
-            
     }
+    catch (error) {
+        console.log(error)
+    } 
+}
     
-    pullAndInsertPunches()
+pullAndInsertPunches()
     

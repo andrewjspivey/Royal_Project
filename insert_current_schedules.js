@@ -15,17 +15,17 @@ const vendorKey = process.env.ESO_VENDOR_KEY
 
 
 
-let dayInFuture = addDays(new Date(), 1)
-let tomorrow = format(new Date(dayInFuture), 'MM/dd/yyyy')
+let startTime = addDays(new Date(), 0)
+let today = format(new Date(startTime), 'MM/dd/yyyy')
 
-let dayAfter = addDays(new Date(), 2)
-let nextDay = format(new Date(dayAfter), 'MM/dd/yyyy')
+let endTime = addDays(new Date(), 2)
+let nextDays = format(new Date(endTime), 'MM/dd/yyyy')
 
-console.log(dayInFuture)
+console.log(nextDays)
 
 
 const esoUrl = `https://sched-api.esosuite.net/API_v1.7/EmployeeService.svc/GetSchedules?custId=${custId}&pass=${esoPassword}&vendorKey=${vendorKey}`
-const params = new url.URLSearchParams({ starttime: tomorrow, endtime: nextDay});
+const params = new url.URLSearchParams({ starttime: today, endtime: nextDays});
 
 
 const config = {
@@ -35,6 +35,22 @@ const config = {
     database: process.env.DATABASE_NAME
 };
 
+const clearTable = async () => {
+    await sql.connect(config)
+    try {
+        let result1 = new sql.Request()
+        sqlQuery = `drop table if exists SchedulesTomorrow`
+        result1.query(sqlQuery, function (err, data) {
+            if (err) console.log(err)
+            sql.close()
+        })
+            
+        } catch (err) {
+            console.log(err)
+            sql.close()
+        }
+}
+
 
 const pullAndInsertSchedules = async () => {
 
@@ -43,11 +59,11 @@ const pullAndInsertSchedules = async () => {
                 
         var data = await response.data.Schedules
     
-        console.log(data)
+        //console.log(data)
                 
         await sql.connect(config)
 
-        console.log("connected")
+        //console.log("connected")
         
         const table = new sql.Table("SchedulesTomorrow");
         table.create = true;
@@ -58,7 +74,7 @@ const pullAndInsertSchedules = async () => {
         table.columns.add('EndTime', sql.DateTime, { nullable: true });
         table.columns.add('Duration', sql.Decimal(4,2), { nullable: true });
         table.columns.add('EarningCode', sql.VarChar(30), { nullable: true });
-        table.columns.add('itemID', sql.Int, { nullable: true });
+        table.columns.add('itemID', sql.Int, { nullable: false, primary: true });
         table.columns.add('Qualification', sql.VarChar(50), { nullable: true });
         table.columns.add('ShiftId', sql.Int, { nullable: true });
         table.columns.add('UnitName', sql.VarChar(50), { nullable: true });
@@ -99,5 +115,19 @@ const pullAndInsertSchedules = async () => {
             
 }
     
-pullAndInsertSchedules()
+const clearAndBulkInsert = async () => {
+    try {
+        await clearTable()
+
+        setTimeout(() => {
+            pullAndInsertSchedules() 
+        }, 3000);
+        
+    } catch (err) {
+        console.log(err)
+    }
+}
+
+clearAndBulkInsert()
+
     

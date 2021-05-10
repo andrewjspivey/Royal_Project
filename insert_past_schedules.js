@@ -14,11 +14,10 @@ const esoPassword = process.env.ESO_PASSWORD
 const vendorKey = process.env.ESO_VENDOR_KEY
 
 
-
-let startSubDaysAgo = subDays(new Date(), 3)
+let startSubDaysAgo = subDays(new Date(), 8)
 let threeDaysAgo = format(new Date(startSubDaysAgo), 'MM/dd/yyyy')
 
-let endSubDaysAgo = subDays(new Date(), 2)
+let endSubDaysAgo = subDays(new Date(), 1)
 let twoDaysAgo = format(new Date(endSubDaysAgo), 'MM/dd/yyyy')
 
 console.log(threeDaysAgo)
@@ -49,7 +48,7 @@ const pullAndInsertSchedules = async () => {
 
         console.log("connected")
         
-        const table = new sql.Table("Schedulestimecheck");
+        const table = new sql.Table("PastWeekSched");
         table.create = true;
         
         table.columns.add('EmployeeId', sql.VarChar(15), { nullable: true});
@@ -58,7 +57,7 @@ const pullAndInsertSchedules = async () => {
         table.columns.add('EndTime', sql.DateTime, { nullable: true });
         table.columns.add('Duration', sql.Decimal(4,2), { nullable: true });
         table.columns.add('EarningCode', sql.VarChar(30), { nullable: true });
-        table.columns.add('itemID', sql.Int, { nullable: true });
+        table.columns.add('itemID', sql.Int, { nullable: false, primary: true });
         table.columns.add('Qualification', sql.VarChar(50), { nullable: true });
         table.columns.add('ShiftId', sql.Int, { nullable: true });
         table.columns.add('UnitName', sql.VarChar(50), { nullable: true });
