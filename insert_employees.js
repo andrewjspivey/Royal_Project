@@ -1,16 +1,13 @@
 const axios = require('axios')
 const url = require('url')
 const sql = require('mssql'); 
-
-
 const dotenv = require('dotenv')
+
 dotenv.config()
 
 const custId = process.env.ESO_CUST_ID
 const esoPassword = process.env.ESO_PASSWORD
 const vendorKey = process.env.ESO_VENDOR_KEY
-
-const esoUrl = `https://sched-api.esosuite.net/API_v1.7/EmployeeService.svc/GetEmployees?custId=${custId}&pass=${esoPassword}&vendorKey=${vendorKey}`
 
 const config = {
     user: process.env.DATABASE_USER,
@@ -20,9 +17,9 @@ const config = {
     accept_eula: process.env.ACCEPT_EULA
 };
 
+const esoUrl = `https://sched-api.esosuite.net/API_v1.7/EmployeeService.svc/GetEmployees?custId=${custId}&pass=${esoPassword}&vendorKey=${vendorKey}`
 
 const pullAndInsertEmployees = async () => {
-
     try {
         const response = await axios.get(esoUrl, {headers: {Accept: 'application/json'}})
                 
@@ -50,8 +47,6 @@ const pullAndInsertEmployees = async () => {
         table.columns.add('Status', sql.Int, { nullable: true });
         
         
-        
-
         var count = Object.keys(data).length;
         console.log(count);
         
@@ -73,7 +68,6 @@ const pullAndInsertEmployees = async () => {
                 sql.close()
             }
         })
-
     }
 
     catch (error) {

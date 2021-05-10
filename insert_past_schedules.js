@@ -13,20 +13,6 @@ const custId = process.env.ESO_CUST_ID
 const esoPassword = process.env.ESO_PASSWORD
 const vendorKey = process.env.ESO_VENDOR_KEY
 
-
-let startSubDaysAgo = subDays(new Date(), 8)
-let threeDaysAgo = format(new Date(startSubDaysAgo), 'MM/dd/yyyy')
-
-let endSubDaysAgo = subDays(new Date(), 1)
-let twoDaysAgo = format(new Date(endSubDaysAgo), 'MM/dd/yyyy')
-
-console.log(threeDaysAgo)
-
-
-const esoUrl = `https://sched-api.esosuite.net/API_v1.7/EmployeeService.svc/GetSchedules?custId=${custId}&pass=${esoPassword}&vendorKey=${vendorKey}`
-const params = new url.URLSearchParams({ starttime: threeDaysAgo, endtime: twoDaysAgo});
-
-
 const config = {
     user: process.env.DATABASE_USER,
     password: process.env.DATABASE_PASSWORD,
@@ -34,19 +20,22 @@ const config = {
     database: process.env.DATABASE_NAME
 };
 
+let startSubDaysAgo = subDays(new Date(), 8) // sets start time to 1 week ago for eso call
+let threeDaysAgo = format(new Date(startSubDaysAgo), 'MM/dd/yyyy')
+
+let endSubDaysAgo = subDays(new Date(), 1) // sets end time to yesterday for eso call
+let twoDaysAgo = format(new Date(endSubDaysAgo), 'MM/dd/yyyy')
+
+const esoUrl = `https://sched-api.esosuite.net/API_v1.7/EmployeeService.svc/GetSchedules?custId=${custId}&pass=${esoPassword}&vendorKey=${vendorKey}`
+const params = new url.URLSearchParams({ starttime: threeDaysAgo, endtime: twoDaysAgo});
 
 const pullAndInsertSchedules = async () => {
-
     try {
         const response = await axios.get(esoUrl, {params, headers: {Accept: 'application/json'}})
                 
         var data = await response.data.Schedules
-    
-        console.log(data)
                 
         await sql.connect(config)
-
-        console.log("connected")
         
         const table = new sql.Table("PastWeekSched");
         table.create = true;
@@ -95,7 +84,6 @@ const pullAndInsertSchedules = async () => {
         console.log(error)
     }
 
-            
 }
     
 pullAndInsertSchedules()

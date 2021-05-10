@@ -13,18 +13,6 @@ const custId = process.env.ESO_CUST_ID
 const esoPassword = process.env.ESO_PASSWORD
 const vendorKey = process.env.ESO_VENDOR_KEY
 
-let startSubDaysAgo = subDays(new Date(), 4)
-let yesterday = format(new Date(startSubDaysAgo), 'MM/dd/yyyy')
-
-let endSubDaysAgo = subDays(new Date(), 3)
-let today = format(new Date(endSubDaysAgo), 'MM/dd/yyyy')
-
-console.log(yesterday)
-
-const esoUrl = `https://sched-api.esosuite.net/API_v1.7/EmployeeService.svc/GetPunches?custId=${custId}&pass=${esoPassword}&vendorKey=${vendorKey}`
-const params = new url.URLSearchParams({ starttime: yesterday, endtime: today});
-
-
 const config = {
     user: process.env.DATABASE_USER,
     password: process.env.DATABASE_PASSWORD,
@@ -33,12 +21,18 @@ const config = {
     accept_eula: process.env.ACCEPT_EULA
 };
 
+let startSubDaysAgo = subDays(new Date(), 1) // sets start time for eso call to yesterday at 12 AM
+let yesterday = format(new Date(startSubDaysAgo), 'MM/dd/yyyy')
+
+let endSubDaysAgo = subDays(new Date(), 0) // sets end time for eso call to today at 12 AM
+let today = format(new Date(endSubDaysAgo), 'MM/dd/yyyy')
+
+const esoUrl = `https://sched-api.esosuite.net/API_v1.7/EmployeeService.svc/GetPunches?custId=${custId}&pass=${esoPassword}&vendorKey=${vendorKey}`
+const params = new url.URLSearchParams({ starttime: yesterday, endtime: today});
 
 const pullAndInsertPunches = async () => {
-
     try {
         const response = await axios.get(esoUrl, {params, headers: {Accept: 'application/json'}})
-                
         var data = await response.data.Punches
 
         await sql.connect(config)
@@ -56,8 +50,6 @@ const pullAndInsertPunches = async () => {
         table.columns.add('EndComment', sql.VarChar(sql.MAX), { nullable: true });
         table.columns.add('EHomeCostCenter', sql.VarChar(50), { nullable: true });
         
-        
-
         var count = Object.keys(data).length;
         console.log(count);
         

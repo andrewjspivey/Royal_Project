@@ -14,20 +14,13 @@ const esoPassword = process.env.ESO_PASSWORD
 const vendorKey = process.env.ESO_VENDOR_KEY
 
 
-
-let startTime = addDays(new Date(), 0)
-let today = format(new Date(startTime), 'MM/dd/yyyy')
+let startTime = addDays(new Date(), 0) 
+let today = format(new Date(startTime), 'MM/dd/yyyy') // sets start time as today for eso request
 
 let endTime = addDays(new Date(), 2)
-let nextDays = format(new Date(endTime), 'MM/dd/yyyy')
+let nextDays = format(new Date(endTime), 'MM/dd/yyyy') // sets end time as 2 days ahead for eso request
 
-console.log(nextDays)
-
-
-const esoUrl = `https://sched-api.esosuite.net/API_v1.7/EmployeeService.svc/GetSchedules?custId=${custId}&pass=${esoPassword}&vendorKey=${vendorKey}`
-const params = new url.URLSearchParams({ starttime: today, endtime: nextDays});
-
-
+// sql config
 const config = {
     user: process.env.DATABASE_USER,
     password: process.env.DATABASE_PASSWORD,
@@ -35,6 +28,7 @@ const config = {
     database: process.env.DATABASE_NAME
 };
 
+// clear table before insert so no duplicates PK
 const clearTable = async () => {
     await sql.connect(config)
     try {
@@ -44,26 +38,24 @@ const clearTable = async () => {
             if (err) console.log(err)
             sql.close()
         })
-            
-        } catch (err) {
-            console.log(err)
-            sql.close()
-        }
+        
+    } catch (err) {
+        console.log(err)
+        sql.close()
+    }
 }
 
+// Eso request url and params
+const esoUrl = `https://sched-api.esosuite.net/API_v1.7/EmployeeService.svc/GetSchedules?custId=${custId}&pass=${esoPassword}&vendorKey=${vendorKey}`
+const params = new url.URLSearchParams({ starttime: today, endtime: nextDays});
 
+// makes eso call to return data, uses data for bulk insert into db
 const pullAndInsertSchedules = async () => {
-
     try {
         const response = await axios.get(esoUrl, {params, headers: {Accept: 'application/json'}})
-                
         var data = await response.data.Schedules
-    
-        //console.log(data)
-                
-        await sql.connect(config)
 
-        //console.log("connected")
+        await sql.connect(config)
         
         const table = new sql.Table("SchedulesTomorrow");
         table.create = true;
@@ -74,7 +66,7 @@ const pullAndInsertSchedules = async () => {
         table.columns.add('EndTime', sql.DateTime, { nullable: true });
         table.columns.add('Duration', sql.Decimal(4,2), { nullable: true });
         table.columns.add('EarningCode', sql.VarChar(30), { nullable: true });
-        table.columns.add('itemID', sql.Int, { nullable: false, primary: true });
+        table.columns.add('itemID', sql.Int, { nullable: false, primary: true }); //PK
         table.columns.add('Qualification', sql.VarChar(50), { nullable: true });
         table.columns.add('ShiftId', sql.Int, { nullable: true });
         table.columns.add('UnitName', sql.VarChar(50), { nullable: true });
@@ -105,16 +97,13 @@ const pullAndInsertSchedules = async () => {
                 sql.close()
             }
         })
-                
     }
 
     catch (error) {
         console.log(error)
-    }
-
-            
 }
-    
+}
+    // waits to clear table then recreates and inserts current schedules
 const clearAndBulkInsert = async () => {
     try {
         await clearTable()

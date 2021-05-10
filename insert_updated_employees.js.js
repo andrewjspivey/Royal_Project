@@ -9,8 +9,6 @@ const custId = process.env.ESO_CUST_ID
 const esoPassword = process.env.ESO_PASSWORD
 const vendorKey = process.env.ESO_VENDOR_KEY
 
-const esoUrl = `https://sched-api.esosuite.net/API_v1.7/EmployeeService.svc/GetEmployees?custId=${custId}&pass=${esoPassword}&vendorKey=${vendorKey}`
-
 const config = {
     user: process.env.DATABASE_USER,
     password: process.env.DATABASE_PASSWORD,
@@ -18,7 +16,6 @@ const config = {
     database: process.env.DATABASE_NAME,
     accept_eula: process.env.ACCEPT_EULA
 };
-
 
 const clearTable = async () => {
     await sql.connect(config)
@@ -29,15 +26,16 @@ const clearTable = async () => {
             if (err) console.log(err)
             sql.close()
         })
-            
-        } catch (err) {
-            console.log(err)
-            sql.close()
-        }
+        
+    } catch (err) {
+        console.log(err)
+        sql.close()
+    }
 }
 
-const pullAndInsertEmployees = async () => {
+const esoUrl = `https://sched-api.esosuite.net/API_v1.7/EmployeeService.svc/GetEmployees?custId=${custId}&pass=${esoPassword}&vendorKey=${vendorKey}`
 
+const pullAndInsertEmployees = async () => {
     try {
         const response = await axios.get(esoUrl, {headers: {Accept: 'application/json'}})
                 
@@ -83,7 +81,6 @@ const pullAndInsertEmployees = async () => {
             }
             else {
                 console.log("success" + result);
-                
                 sql.close();
             }
         })
