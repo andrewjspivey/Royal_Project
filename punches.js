@@ -2,6 +2,7 @@
 const axios = require('axios')
 const url = require('url')
 const sql = require('mssql'); 
+var config = require('./config')
 
 const subDays = require('date-fns/subDays')
 var format = require('date-fns/format')
@@ -13,13 +14,6 @@ const custId = process.env.ESO_CUST_ID
 const esoPassword = process.env.ESO_PASSWORD
 const vendorKey = process.env.ESO_VENDOR_KEY
 
-const config = {
-    user: process.env.DATABASE_USER,
-    password: process.env.DATABASE_PASSWORD,
-    server: process.env.DATABASE_SERVER,
-    database: process.env.DATABASE_NAME,
-    accept_eula: process.env.ACCEPT_EULA
-};
 
 let startSubDaysAgo = subDays(new Date(), 1) // sets start time for eso call to yesterday at 12 AM
 let yesterday = format(new Date(startSubDaysAgo), 'MM/dd/yyyy')
@@ -37,15 +31,15 @@ const pullAndInsertPunches = async () => {
 
         await sql.connect(config)
         
-        const table = new sql.Table("PunchesPunchId");
+        const table = new sql.Table("PunchesTable");
         table.create = true;
         
-        table.columns.add('EmployeeId', sql.VarChar(20), { nullable: false });
-        table.columns.add('FirstName', sql.VarChar(30), { nullable: true });
+        table.columns.add('EmployeeId', sql.VarChar(20), { nullable: true });
+        table.columns.add('FirstName', sql.VarChar(35), { nullable: true });
         table.columns.add('LastName', sql.VarChar(40), { nullable: true });
         table.columns.add('InPunchTime', sql.DateTime, { nullable: true });
         table.columns.add('OutPunchTime', sql.DateTime, { nullable: true });
-        table.columns.add('PunchId', sql.Int, { nullable: false, primary: true });
+        table.columns.add('PunchId', sql.Int, { nullable: true });
         table.columns.add('StartComment', sql.VarChar(sql.MAX), { nullable: true });
         table.columns.add('EndComment', sql.VarChar(sql.MAX), { nullable: true });
         table.columns.add('EHomeCostCenter', sql.VarChar(50), { nullable: true });
@@ -66,7 +60,7 @@ const pullAndInsertPunches = async () => {
                 sql.close()
             }
             else {
-                console.log("success" + result)
+                console.log("success. Rows Affected: " + result.rowsAffected)
                 sql.close()
             }
         })

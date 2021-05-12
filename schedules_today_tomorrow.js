@@ -2,6 +2,7 @@
 const axios = require('axios')
 const url = require('url')
 const sql = require('mssql'); 
+var config = require('./config')
 
 const addDays = require('date-fns/addDays')
 var format = require('date-fns/format')
@@ -14,26 +15,15 @@ const esoPassword = process.env.ESO_PASSWORD
 const vendorKey = process.env.ESO_VENDOR_KEY
 
 
-let startTime = addDays(new Date(), 0) 
-let today = format(new Date(startTime), 'MM/dd/yyyy') // sets start time as today for eso request
-
-let endTime = addDays(new Date(), 2)
-let nextDays = format(new Date(endTime), 'MM/dd/yyyy') // sets end time as 2 days ahead for eso request
-
-// sql config
-const config = {
-    user: process.env.DATABASE_USER,
-    password: process.env.DATABASE_PASSWORD,
-    server: process.env.DATABASE_SERVER,
-    database: process.env.DATABASE_NAME
-};
+let tomorrow = addDays(new Date(), 2)
+let tomorrowDate = format(new Date(tomorrow), 'yyyy/MM/dd') // sets end time as 2 days ahead for eso request
 
 // clear table before insert so no duplicates PK
 const clearTable = async () => {
     await sql.connect(config)
     try {
         let result1 = new sql.Request()
-        sqlQuery = `drop table if exists SchedulesTomorrow`
+        sqlQuery = `delete from SchedulesTodayTomorrow where StartTime <= '${tomorrowDate}'`
         result1.query(sqlQuery, function (err, data) {
             if (err) console.log(err)
             sql.close()
@@ -43,7 +33,13 @@ const clearTable = async () => {
         console.log(err)
         sql.close()
     }
-}
+} //  `delete from SchedulesTomorrow where StartTime < '${tomorrowDate}'` 
+
+let startTime = addDays(new Date(), 0) 
+let today = format(new Date(startTime), 'MM/dd/yyyy') // sets start time as today for eso request
+
+let endTime = addDays(new Date(), 2)
+let nextDays = format(new Date(endTime), 'MM/dd/yyyy') // sets end time as 2 days ahead for eso request
 
 // Eso request url and params
 const esoUrl = `https://sched-api.esosuite.net/API_v1.7/EmployeeService.svc/GetSchedules?custId=${custId}&pass=${esoPassword}&vendorKey=${vendorKey}`
@@ -57,7 +53,7 @@ const pullAndInsertSchedules = async () => {
 
         await sql.connect(config)
         
-        const table = new sql.Table("SchedulesTomorrow");
+        const table = new sql.Table("SchedulesTodayTomorrow");
         table.create = true;
         
         table.columns.add('EmployeeId', sql.VarChar(15), { nullable: true});
@@ -66,7 +62,7 @@ const pullAndInsertSchedules = async () => {
         table.columns.add('EndTime', sql.DateTime, { nullable: true });
         table.columns.add('Duration', sql.Decimal(4,2), { nullable: true });
         table.columns.add('EarningCode', sql.VarChar(30), { nullable: true });
-        table.columns.add('itemID', sql.Int, { nullable: false, primary: true }); //PK
+        table.columns.add('itemID', sql.Int, { nullable: true }); 
         table.columns.add('Qualification', sql.VarChar(50), { nullable: true });
         table.columns.add('ShiftId', sql.Int, { nullable: true });
         table.columns.add('UnitName', sql.VarChar(50), { nullable: true });
@@ -93,7 +89,7 @@ const pullAndInsertSchedules = async () => {
                 sql.close()
             }
             else {
-                console.log("success" + result)
+                console.log("success. Rows Affected: " + result.rowsAffected)
                 sql.close()
             }
         })
@@ -103,7 +99,7 @@ const pullAndInsertSchedules = async () => {
         console.log(error)
 }
 }
-    // waits to clear table then recreates and inserts current schedules
+    // waits to delete rows then inserts current schedules
 const clearAndBulkInsert = async () => {
     try {
         await clearTable()
@@ -119,4 +115,3 @@ const clearAndBulkInsert = async () => {
 
 clearAndBulkInsert()
 
-    

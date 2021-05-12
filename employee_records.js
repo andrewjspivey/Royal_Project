@@ -1,6 +1,7 @@
 const axios = require('axios')
 const url = require('url')
 const sql = require('mssql'); 
+var config = require('./config')
 
 const dotenv = require('dotenv')
 dotenv.config()
@@ -9,13 +10,6 @@ const custId = process.env.ESO_CUST_ID
 const esoPassword = process.env.ESO_PASSWORD
 const vendorKey = process.env.ESO_VENDOR_KEY
 
-const config = {
-    user: process.env.DATABASE_USER,
-    password: process.env.DATABASE_PASSWORD,
-    server: process.env.DATABASE_SERVER,
-    database: process.env.DATABASE_NAME,
-    accept_eula: process.env.ACCEPT_EULA
-};
 
 const clearTable = async () => {
     await sql.connect(config)
@@ -62,7 +56,6 @@ const pullAndInsertEmployees = async () => {
         table.columns.add('PayrollId', sql.VarChar(6), { nullable: true });
         table.columns.add('Status', sql.Int, { nullable: true });
         
-    
         var count = Object.keys(data).length;
         console.log(count);
         

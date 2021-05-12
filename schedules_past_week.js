@@ -2,6 +2,7 @@
 const axios = require('axios')
 const url = require('url')
 const sql = require('mssql'); 
+var config = require('./config')
 
 const subDays = require('date-fns/subDays')
 const addDays = require('date-fns/addDays')
@@ -14,12 +15,6 @@ const custId = process.env.ESO_CUST_ID
 const esoPassword = process.env.ESO_PASSWORD
 const vendorKey = process.env.ESO_VENDOR_KEY
 
-const config = {
-    user: process.env.DATABASE_USER,
-    password: process.env.DATABASE_PASSWORD,
-    server: process.env.DATABASE_SERVER,
-    database: process.env.DATABASE_NAME
-};
 
 //for clearLastWeek query
 let overAWeekOld = subDays(new Date(), 7) // sets start time to 1 week ago for delete rows query in cleartable
@@ -31,7 +26,7 @@ const clearLastWeek = async () => {
     await sql.connect(config)
     try {
         let result1 = new sql.Request()
-        sqlQuery = `delete from PastWeekSched where StartTime > '${weekAgo}'`
+        sqlQuery = `delete from PastSched where StartTime > '${weekAgo}'`
         result1.query(sqlQuery, function (err, data) {
             if (err) console.log(err)
             sql.close()
@@ -60,7 +55,7 @@ const pullAndInsertSchedules = async () => {
                 
         await sql.connect(config)
         
-        const table = new sql.Table("PastWeekSched");
+        const table = new sql.Table("PastSched");
         table.create = true;
         
         table.columns.add('EmployeeId', sql.VarChar(15), { nullable: true});
@@ -96,7 +91,7 @@ const pullAndInsertSchedules = async () => {
                 sql.close()
             }
             else {
-                console.log("success" + result)
+                console.log("success. Rows Affected: " + result.rowsAffected)
                 sql.close()
             }
         })
