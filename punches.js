@@ -24,6 +24,7 @@ let today = format(new Date(endSubDaysAgo), 'MM/dd/yyyy')
 const esoUrl = `https://sched-api.esosuite.net/API_v1.7/EmployeeService.svc/GetPunches?custId=${custId}&pass=${esoPassword}&vendorKey=${vendorKey}`
 const params = new url.URLSearchParams({ starttime: yesterday, endtime: today});
 
+// inserts all of yesterdays punches
 const pullAndInsertPunches = async () => {
     try {
         const response = await axios.get(esoUrl, {params, headers: {Accept: 'application/json'}})
@@ -31,7 +32,7 @@ const pullAndInsertPunches = async () => {
 
         await sql.connect(config)
         
-        const table = new sql.Table("PunchesTable");
+        const table = new sql.Table("Punches");
         table.create = true;
         
         table.columns.add('EmployeeId', sql.VarChar(20), { nullable: true });

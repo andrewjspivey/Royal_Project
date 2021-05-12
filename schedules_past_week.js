@@ -25,9 +25,9 @@ console.log(weekAgo)
 const clearLastWeek = async () => {
     await sql.connect(config)
     try {
-        let result1 = new sql.Request()
-        sqlQuery = `delete from PastSched where StartTime > '${weekAgo}'`
-        result1.query(sqlQuery, function (err, data) {
+        let sqlRequest = new sql.Request()
+        sqlQuery = `delete from SchedulesPast where StartTime > '${weekAgo}'`
+        sqlRequest.query(sqlQuery, function (err, data) {
             if (err) console.log(err)
             sql.close()
         })
@@ -55,7 +55,7 @@ const pullAndInsertSchedules = async () => {
                 
         await sql.connect(config)
         
-        const table = new sql.Table("PastSched");
+        const table = new sql.Table("SchedulesPast");
         table.create = true;
         
         table.columns.add('EmployeeId', sql.VarChar(15), { nullable: true});

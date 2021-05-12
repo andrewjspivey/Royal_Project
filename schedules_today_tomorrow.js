@@ -15,16 +15,16 @@ const esoPassword = process.env.ESO_PASSWORD
 const vendorKey = process.env.ESO_VENDOR_KEY
 
 
-let tomorrow = addDays(new Date(), 2)
+let tomorrow = addDays(new Date(), 3)
 let tomorrowDate = format(new Date(tomorrow), 'yyyy/MM/dd') // sets end time as 2 days ahead for eso request
 
 // clear table before insert so no duplicates PK
 const clearTable = async () => {
     await sql.connect(config)
     try {
-        let result1 = new sql.Request()
+        let sqlRequest = new sql.Request()
         sqlQuery = `delete from SchedulesTodayTomorrow where StartTime <= '${tomorrowDate}'`
-        result1.query(sqlQuery, function (err, data) {
+        sqlRequest.query(sqlQuery, function (err, data) {
             if (err) console.log(err)
             sql.close()
         })
