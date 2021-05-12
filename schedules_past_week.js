@@ -4,6 +4,7 @@ const url = require('url')
 const sql = require('mssql'); 
 
 const subDays = require('date-fns/subDays')
+const addDays = require('date-fns/addDays')
 var format = require('date-fns/format')
 
 const dotenv = require('dotenv')
@@ -20,12 +21,17 @@ const config = {
     database: process.env.DATABASE_NAME
 };
 
+//for clearLastWeek query
+let overAWeekOld = subDays(new Date(), 7) // sets start time to 1 week ago for delete rows query in cleartable
+let weekAgo = format(new Date(overAWeekOld), 'yyyy/MM/dd') //format for sql date query
 
-const clearTable = async () => {
+console.log(weekAgo)
+
+const clearLastWeek = async () => {
     await sql.connect(config)
     try {
         let result1 = new sql.Request()
-        sqlQuery = `drop table if exists PastWeekSched`
+        sqlQuery = `delete from PastWeekSched where StartTime > '${weekAgo}'`
         result1.query(sqlQuery, function (err, data) {
             if (err) console.log(err)
             sql.close()
@@ -35,16 +41,16 @@ const clearTable = async () => {
         console.log(err)
         sql.close()
     }
-}
+} //  `delete from PastWeekSched where StartTime > '${weekAgo}'`
 
 let startSubDaysAgo = subDays(new Date(), 7) // sets start time to 1 week ago for eso call
-let threeDaysAgo = format(new Date(startSubDaysAgo), 'MM/dd/yyyy')
+let oneWeekAgo = format(new Date(startSubDaysAgo), 'MM/dd/yyyy') // date format for eso api call
 
-let endSubDaysAgo = subDays(new Date(), 0) // sets end time to yesterday for eso call
-let twoDaysAgo = format(new Date(endSubDaysAgo), 'MM/dd/yyyy')
+let endSubDaysAgo = addDays(new Date(), 1) // sets end time to today at midnight for eso call
+let twoDaysAgo = format(new Date(endSubDaysAgo), 'MM/dd/yyyy') 
 
 const esoUrl = `https://sched-api.esosuite.net/API_v1.7/EmployeeService.svc/GetSchedules?custId=${custId}&pass=${esoPassword}&vendorKey=${vendorKey}`
-const params = new url.URLSearchParams({ starttime: threeDaysAgo, endtime: twoDaysAgo});
+const params = new url.URLSearchParams({ starttime: oneWeekAgo, endtime: twoDaysAgo});
 
 const pullAndInsertSchedules = async () => {
     try {
@@ -60,7 +66,7 @@ const pullAndInsertSchedules = async () => {
         table.columns.add('EmployeeId', sql.VarChar(15), { nullable: true});
         table.columns.add('CostCenter', sql.VarChar(40), { nullable: true });
         table.columns.add('StartTime', sql.DateTime, { nullable: false });
-        table.columns.add('EndTime', sql.DateTime, { nullable: false });
+        table.columns.add('EndTime', sql.DateTime, { nullable: true });
         table.columns.add('Duration', sql.Decimal(4,2), { nullable: true });
         table.columns.add('EarningCode', sql.VarChar(30), { nullable: true });
         table.columns.add('itemID', sql.Int, { nullable: false });
@@ -105,11 +111,11 @@ const pullAndInsertSchedules = async () => {
 
 const clearAndBulkInsert = async () => {
     try {
-        await clearTable()
+        await clearLastWeek()
 
         setTimeout(() => {
             pullAndInsertSchedules() 
-        }, 3000);
+        }, 2000);
         
     } catch (err) {
         console.log(err)

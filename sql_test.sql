@@ -1,5 +1,5 @@
 
 
-DROP TABLE dbo.PastWeekSched
+SELECT * FROM dbo.PastWeekSched
 
 GO
