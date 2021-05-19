@@ -15,7 +15,7 @@ const clearTable = async () => {
     await sql.connect(config)
     try {
         let sqlRequest = new sql.Request()
-        sqlQuery = `drop table if exists EmployeesRecords`
+        sqlQuery = `drop table if exists EmployeeRecords`
         sqlRequest.query(sqlQuery, function (err, data) {
             if (err) console.log(err)
             sql.close()
