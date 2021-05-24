@@ -17,7 +17,7 @@ const esoUrl = `https://sched-api.esosuite.net/API_v1.7/EmployeeService.svc/GetE
 
 let conn = new sql.ConnectionPool(config)
 
-const InsertEmployees = async () => {
+const UpsertEmployees = async () => {
     try {
         const response = await axios.get(esoUrl, {headers: {Accept: 'application/json'}})
                 
@@ -67,35 +67,9 @@ const InsertEmployees = async () => {
             console.log(error)
         }
         finally {
-            // shut down pool since we're no longer using it
             await conn.close();
         }
 
 }
 
-InsertEmployees()
-
-// const pullEmployees = async (callback) => {
-//     try {
-//         const response = await axios.get(esoUrl, {headers: {Accept: 'application/json'}})
-//         var data = await response.data.Employees
-        
-//         setTimeout(() => {
-//             callback(data)
-//         }, 2000)
-//     }
-//     catch (error) {
-//         console.log(error)
-//     }
-// }
-
-// const parseEmployeeId = (data) => {
-//     var esoCount = Object.keys(data).length;
-    
-//     for (let i = 0; i < esoCount; i ++) {
-//         data[i].EmployeeId = parseInt(data[i].EmployeeId, 10)
-//     }
-//     return data
-// }
-
-//var parsedData = pullEmployees(parseEmployeeId)
+UpsertEmployees()
