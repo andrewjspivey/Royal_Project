@@ -25,7 +25,7 @@ const UpsertEmployees = async () => {
 
         await conn.connect();
 
-        const Employeetvp = new sql.Table("EmployeeType"); 
+        const Employeetvp = new sql.Table(); 
         Employeetvp.create = true
 
         Employeetvp.columns.add('EmployeeId', sql.VarChar(20), { nullable: false});
@@ -56,11 +56,11 @@ const UpsertEmployees = async () => {
         
         const req = new sql.Request(conn);
 
-        await req.bulk(Employeetvp);
 
         req.input('Employeetvp', Employeetvp)
 
         await req.execute('EmployeeUpsert');
+
         
         }
         catch (error) {
