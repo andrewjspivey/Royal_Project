@@ -8,6 +8,8 @@ const config = {
     password: process.env.DATABASE_PASSWORD,
     server: process.env.DATABASE_SERVER,
     database: process.env.DATABASE_NAME,
-    accept_eula: process.env.ACCEPT_EULA
+    options: {
+        useUTC: false
+    }
 };
 module.exports = config
