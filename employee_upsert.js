@@ -1,11 +1,8 @@
 const axios = require('axios')
-const url = require('url')
 const sql = require('mssql'); 
-const { Sequelize, json } = require('sequelize');
 var config = require('./config')
 
 const dotenv = require('dotenv');
-const { resolve } = require('path');
 dotenv.config()
 
 const custId = process.env.ESO_CUST_ID
@@ -55,7 +52,6 @@ const UpsertEmployees = async () => {
         };
         
         const req = new sql.Request(conn);
-
 
         req.input('Employeetvp', Employeetvp)
 
