@@ -1,6 +1,6 @@
 const axios = require('axios')
 const url = require('url')
-const sql = require('mssql'); 
+const sql = require('mssql/msnodesqlv8'); 
 var config = require('./config')
 
 const dotenv = require('dotenv')
