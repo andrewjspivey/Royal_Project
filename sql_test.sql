@@ -1,5 +1,5 @@
 
---select * from EmployeeRecords
+--select * from Punches
 
 
 -- CREATE TYPE EmployeeType AS TABLE ( EmployeeId VARCHAR(20),
@@ -19,10 +19,10 @@
 --                                     Status INT );
 
 -- CREATE PROCEDURE EmployeeUpsert 
---     @Employeetvp EmployeeType READONLY
+   
 -- AS 
 --     MERGE INTO EmployeeRecords AS Target
---             USING @Employeetvp AS Source
+--             USING #temp AS Source
 --             ON Target.EmployeeId = Source.EmployeeId
 --             WHEN MATCHED THEN
 --             UPDATE SET 

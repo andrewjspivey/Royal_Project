@@ -4,11 +4,12 @@ const dotenv = require('dotenv')
 dotenv.config()
 
 const config = {
-    user: process.env.DATABASE_USER,
-    password: process.env.DATABASE_PASSWORD,
     server: process.env.DATABASE_SERVER,
+    port: 1433,
     database: process.env.DATABASE_NAME,
+    driver: "msnodesqlv8",
     options: {
+        trustedConnection: true,
         useUTC: false
     }
 };

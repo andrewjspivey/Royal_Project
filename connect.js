@@ -1,5 +1,4 @@
-const sql = require('mssql'); 
-const { Sequelize } = require('sequelize');
+const sql = require('mssql/msnodesqlv8'); 
 const dotenv = require('dotenv')
 dotenv.config()
 var config = require('./config')
